@@ -1,23 +1,188 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ApnaDost - AI Chatbot</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApnaDost - AI Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-container {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            height: 80vh;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header {
+            background: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            padding: 12px 16px;
+            border-radius: 15px;
+            max-width: 80%;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+        .user-msg {
+            background: #4CAF50;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+        }
+        .ai-msg {
+            background: #f1f1f1;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+        }
+        .input-area {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 15px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
 </head>
 <body>
-  <div class="chat-container">
-    <header>🤖 ApnaDost - Your Friendly Chatbot</header>
-    <div id="chat-box" class="chat-box"></div>
-    <div class="input-area">
-      <input type="text" id="user-input" placeholder="Type your message..." autofocus />
-      <button onclick="sendMessage()">Send</button>
+
+<div class="chat-container">
+    <div class="header">🤖 ApnaDost</div>
+    <div class="messages" id="chat-box">
+        <div class="message ai-msg">Namaste! Main ApnaDost hoon. Aap mujhe kuch bhi puuch sakte hain!</div>
     </div>
-  </div>
-  <footer>
-    Made by Mohit Pathak | All Rights Reserved |
-  </footer>
-  <script src="script.js"></script>
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="Yahan likhein..." onkeypress="handleEnter(event)">
+        <button onclick="sendMessage()">➤</button>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+
+    // Simple AI Responses (Hindi + English mix)
+    const responses = {
+        // Greetings
+        "namaste": "Namaste dost! Kaise hain aap? 🙏",
+        "hi": "Hello! Kaise help kar sakta hoon? 👋",
+        "hello": "Hi there! 😄",
+        "hey": "Hey! What's cooking? 🍳",
+        
+        // How are you
+        "kaise ho": "Main theek hoon, shukriya! Aap kaise hain? 😊",
+        "how are you": "I'm doing great! Thanks for asking 😄",
+        
+        // About ApnaDost
+        "naam": "Mera naam ApnaDost hai! 😊",
+        "who are you": "Main ek AI chatbot hoon jo aapki help ke liye yahan hai!",
+        "apna dost": "Ji haan, main hoon na! Always ready to help! 💪",
+        
+        // Help
+        "help": "Bataiye, kaisi help chahiye?",
+        "madad": "Ji haan, kaisi madad chahiye?",
+        
+        // Fun
+        "kya haal hai": "Sab theek chal raha hai! 😄",
+        "boring": "Arey kyu boring? Chat karo na! 😜",
+        "single": "Haan, main hoon. Aapke liye single and ready to mingle! 💕 (just kidding 😂)",
+        
+        // Hindi Support
+        "hindi": "Ji haan, main Hindi-English dono mein baat kar sakta hoon!",
+        "english": "Yes I can speak English too!",
+        
+        // Jokes
+        "joke": "Why did the developer go broke? Because he used up all his cache! 😂💸",
+        "chutkule": "Ek programmer ki biwi usse boli: 'Bug fix karo!' 😂",
+        
+        // Coding
+        "code": "Kis language mein coding sikhna chahte ho? HTML, CSS, JavaScript?",
+        "html": "HTML web pages ki bone hoti hai. Simple hai!",
+        
+        // Default
+        "default": "Samajh nahi aaya, zara dobara likhein! 🤔"
+    };
+
+    function handleEnter(e) {
+        if (e.key === 'Enter') sendMessage();
+    }
+
+    function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        addMessage(text, 'user-msg');
+        userInput.value = "";
+
+        // Simulate typing delay
+        setTimeout(() => {
+            const reply = getResponse(text.toLowerCase());
+            addMessage(reply, 'ai-msg');
+        }, 500);
+    }
+
+    function addMessage(text, className) {
+        const div = document.createElement('div');
+        div.className = `message ${className}`;
+        div.innerText = text;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function getResponse(input) {
+        // Match keywords
+        for (const key in responses) {
+            if (input.includes(key)) {
+                return responses[key];
+            }
+        }
+        return responses["default"];
+    }
+</script>
+
 </body>
 </html>
